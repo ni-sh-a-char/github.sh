@@ -17,3 +17,5 @@ do
     git remote add $i https://github.com/PIYUSH-MISHRA-00/${map[$i]}.git # replace "username" with your Github username
     git push -u $i main # you can replace main with the destination branch you want to select
 done
+
+git push
