@@ -15,5 +15,6 @@ git commit -m "git auto commit"
 for i in "${!map[@]}"
 do
     git remote add $i https://github.com/PIYUSH-MISHRA-00/${map[$i]}.git # replace "username" with your Github username
-    git push $i main # you can replace main with the destination branch you want to select
+    git push -u $i main # you can replace main with the destination branch you want to select
+    git push
 done
