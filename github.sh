@@ -8,12 +8,13 @@ map["Git-Automation"] = "Git-Automation"  # replace remote with remote you creat
 #map["remote"] = "original" # you can add as many remote and destination repository you want to push just like this
 
 git config --global user.name "PIYUSH-MISHRA-00" # replace username inside inverted comma with your GitHub user name
+# git config --global user.signingkey MY_KEY_ID # replace "MY_KEY_ID" with your GPG key for signed commits
 git init
 git add .
 echo "Enter Commit message: "
 read message
 
-git commit -m $echo "$message"
+git commit -m $echo "$message" # use git commit -S -m $echo "$message" if you have used your GPG key
 
 for i in "${!map[@]}"
 do
