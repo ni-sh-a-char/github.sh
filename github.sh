@@ -12,7 +12,7 @@ git init
 git add .
 echo "Enter Commit message: "
 read message
-git commit -m "$echo message"
+git commit -m $echo message
 
 for i in "${!map[@]}"
 do
