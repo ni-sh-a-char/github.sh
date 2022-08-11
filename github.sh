@@ -10,7 +10,9 @@ map["Git-Automation"] = "Git-Automation"  # replace remote with remote you creat
 git config --global user.name "PIYUSH-MISHRA-00" # replace username inside inverted comma with your GitHub user name
 git init
 git add .
-git commit -m "git auto commit" # you can add any message of your choice
+echo "Enter Commit message: "
+read message
+git commit -m "$echo message"
 
 for i in "${!map[@]}"
 do
