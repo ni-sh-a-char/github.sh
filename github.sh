@@ -3,15 +3,47 @@
 while :
 do
 echo "Which Git operation you want to perform ?"
+echo
+echo "GitHub username: $username"
+echo "Local repository name: $local_repo"
+echo "Remote repository name: $remote"
+echo "GPG key value: $GPG"
+echo
+echo -e "\t(0) Configure (configures the script for continuous uses)"
 echo -e "\t(1) Clone"
 echo -e "\t(2) Pull"
 echo -e "\t(3) Push"
 echo -e "\t(4) Exit"
-echo -n "Enter your choice [1-4]: "
+echo -n "Enter your choice [0-4]: "
 
 read choice
 
 case $choice in
+
+ 0) echo "Enter the values for future use of the script..."
+    echo
+    echo "Enter GitHub username: "
+    read username
+    export username
+    echo "Your username is: $username"
+    echo
+    echo "Local repository name: "
+    read local_repo
+    export local_repo
+    echo "Your local repository name is: $local_repo"
+    echo 
+    echo "Remote repository name: "
+    read remote
+    export remote
+    echo "Remote repository name is: $remote"
+    echo
+    echo "GPG key id for signed commits(leave blank if you don't want signed commits)"
+    read GPG
+    export GPG
+    echo "GPG key value is: $GPG"
+    echo
+   ;;
+
  1) echo "Cloning from GitHub"
     echo
     echo "Enter the repository https url: "
@@ -53,35 +85,35 @@ case $choice in
     esac
     done
     ;;
+
  3) echo "Pushing to GitHub" 
     declare -A map
 
-    map["Git-Automation"] = "Git-Automation"  # replace remote with remote you created and replace original with your repository you want to push the files
-    #map["remote"] = "original" # you can add as many remote and destination repository you want to push just like this by changing the remote and original inside the inverted comma.
-    #map["remote"] = "original" # you can add as many remote and destination repository you want to push just like this
-    #map["remote"] = "original" # you can add as many remote and destination repository you want to push just like this
+    map[$echo"$local_repo"] = $echo"$remote"
 
-    git config --global user.name "PIYUSH-MISHRA-00" # replace username inside inverted comma with your GitHub user name
-    # git config --global user.signingkey MY_KEY_ID # replace "MY_KEY_ID" with your GPG key for signed commits
+    git config --global user.name $echo"$username" 
+    git config --global user.signingkey $echo$GPG 
     git init
     git add .
     echo "Enter Commit message: "
     read message
 
-    git commit -m $echo "$message" # use git commit -S -m $echo "$message" if you have used your GPG key
+    git commit -m $echo "$message" 
 
     for i in "${!map[@]}"
-    do
-        git remote add $i https://github.com/PIYUSH-MISHRA-00/${map[$i]}.git # replace "PIYUSH-MISHRA-00" with your Github username
-        git push -u $i main # you can replace main with the destination branch you want to select
-    done
+      do
+      git remote add $i https://github.com/$echo$username/${map[$i]}.git 
+      git push -u $i main 
+      done
 
-    git push;;
+      git push;;
 
  4) echo "Quitting..."
-    exit;;
+    exit
+    ;;
 
- *) echo "Invalid operation";;
+ *) echo "Invalid operation"
+    ;;
 
  esac
  done   
