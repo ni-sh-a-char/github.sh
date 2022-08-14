@@ -4,6 +4,7 @@
 
 while :
 do
+echo
 echo "Which Git operation you want to perform ?"
 echo
 echo "GitHub username: $username"
