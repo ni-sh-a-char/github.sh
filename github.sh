@@ -9,6 +9,7 @@ echo
 echo "GitHub username: $username"
 echo "Local repository name: $local_repo"
 echo "Remote repository name: $remote"
+echo "The default branch you want to work with: $branch"
 echo "GPG key value: $GPG"
 echo
 echo -e "\t(0) Configure (configures the script for continuous uses)"
@@ -38,6 +39,13 @@ case $choice in
     read remote
     export remote
     echo "Remote repository name is: $remote"
+    echo
+    echo "The default branch you want to work with: "
+    read branch
+    export branch
+    echo "The default branch you want to work with: $branch"
+    echo
+    echo "GPG key value is: $GPG"
     echo
     echo "GPG key id for signed commits(leave blank if you don't want signed commits)"
     read GPG
@@ -105,7 +113,7 @@ case $choice in
     for i in "${!map[@]}"
       do
       git remote add $i https://github.com/$echo$username/${map[$i]}.git 
-      git push -u $i main 
+      git push -u $i $echo$branch 
       done
 
       git push;;
