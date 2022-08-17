@@ -107,14 +107,15 @@ case $choice in
     git config --global user.signingkey $echo$GPG 
     git init
     git add .
+    echo "Enter Commit message: "
+    read message
+    git commit -m $echo "$message"
     echo "Enter Tag name: (Press enter if you want to skip the tag name)"
     read tag
     echo "Enter Tag message: (Press enter if you want to skip the tag message)"
     read tag_message
-    echo "Enter Commit message: "
-    read message
     git tag -a $echo$tag -m "$echo$tag_message"
-    git commit -m $echo "$message" 
+    git tag -n
 
     for i in "${!map[@]}"
       do
