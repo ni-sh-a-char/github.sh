@@ -18,8 +18,9 @@ echo -e "\t(0) Configure (configures the script for continuous uses)"
 echo -e "\t(1) Clone"
 echo -e "\t(2) Pull"
 echo -e "\t(3) Push"
-echo -e "\t(4) Exit"
-echo -n "Enter your choice [0-4]: "
+echo -e "\t(4) Send Email"
+echo -e "\t(5) Exit"
+echo -n "Enter your choice [0-5]: "
 
 read choice
 
@@ -125,9 +126,21 @@ case $choice in
 
       git push;;
 
- 4) echo "Quitting..."
+
+ 4) echo Send Email
+    echo Enter the receiver... ??
+    read receiver
+    echo File you want to mail ??
+    read filename 
+    git send-email --to=$receiver $filename
+    ;;
+
+    
+ 5) echo "Quitting..."
     exit
     ;;
+
+
 
  *) echo "Invalid operation"
     ;;
