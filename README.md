@@ -3,12 +3,14 @@ Script to automate Git from project working directory with a menu to choose from
 
 ```
 Which Git operations you want to perform ?
-(0) Configure
-(1) Clone
-(2) Pull
-(3) Push
-(4) Exit
-Enter your choice [0-4]:
+(0) Configure (configures the script for continuous uses)"
+(1) Clone"
+(2) Pull"
+(3) Push"
+(4) Generate Patch"
+(5) Send Email"
+(6) Exit"
+Enter your choice [0-6]:
 ```
 
 # About
