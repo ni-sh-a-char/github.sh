@@ -9,8 +9,9 @@ Which Git operations you want to perform ?
 (3) Push"
 (4) Generate Patch"
 (5) Send Email"
-(6) Exit"
-Enter your choice [0-6]:
+(6) ETERNITY
+(7) Exit"
+Enter your choice [0-7]:
 ```
 
 # About
