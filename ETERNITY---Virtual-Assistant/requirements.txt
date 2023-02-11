@@ -1,0 +1,12 @@
+beautifulsoup4==4.11.1
+certifi==2022.12.7
+gTTS==2.2.4
+jmespath==0.10.0
+numpy
+opencv_python
+Pillow==9.3.0
+playsound==1.2.2
+PyAutoGUI==0.9.53
+pyttsx3==2.90
+SpeechRecognition==3.8.1
+WebOb==1.8.6

@@ -1,14 +1,12 @@
 #! /bin/bash
 
-python /home/user/ETERNITY.py
-
 ### Git automation script for automating git clone, push and pull ###
 ### Created by PIYUSH-MISHRA-00 ###
 
 while :
 do
 echo
-echo "Which Git operation you want to perform ?"
+echo "Which Git operation you want to perform ? "
 echo
 echo "GitHub username: $username"
 echo "Local repository name: $local_repo"
@@ -20,11 +18,8 @@ echo -e "\t(0) Configure (configures the script for continuous uses)"
 echo -e "\t(1) Clone"
 echo -e "\t(2) Pull"
 echo -e "\t(3) Push"
-echo -e "\t(4) Generate Patch"
-echo -e "\t(5) Send Email"
-echo -e "\t(6) ETERNITY---Virtual-Assistant"
-echo -e "\t(7) Exit"
-echo -n "Enter your choice [0-7]: "
+echo -e "\t(4) Exit"
+echo -n "Enter your choice [0-4]: "
 
 read choice
 
@@ -130,38 +125,9 @@ case $choice in
 
       git push;;
 
-
- 4) echo "Generate Patch"
-    echo "Enter file 1 and file 2"
-    echo "Enter file 1"
-    read fileone
-    export fileone
-    echo "Enter file2"
-    read filetwo
-    export filetwo
-    diff $echo$fileone $echo$filetwo -staged
-    echo "Enter the file name created using diff"
-    read file_diff
-    export file_diff
-    git patch $file_diff
-   ;; 
-
- 5) echo "Send Email"
-    echo "Enter the receiver... ??"
-    read receiver
-    echo "File you want to mail ??"
-    read filename 
-    git send-email --to=$receiver $filename
-    ;;
-
- 6) echo "Initializing ETERNITY"
-    python ETERNITY.py
-    ;;
-
- 7) echo "Quitting..."
+ 4) echo "Quitting..."
     exit
     ;;
-
 
  *) echo "Invalid operation"
     ;;
