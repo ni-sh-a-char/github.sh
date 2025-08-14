@@ -1,0 +1,1 @@
+Starter for feature/git-automation: Improve automation of Git tasks
