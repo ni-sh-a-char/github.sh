@@ -1,160 +1,205 @@
 # github.sh  
 **Script to automate git from working directory.**  
 
-`github.sh` is a lightweight Bash helper that wraps the most common Git operations into short, memorable commands. It is designed to be run from any project directory, eliminating the need to remember long `git` invocations or to type repetitive flags.  
+A lightweight Bash helper that wraps the most common `git` commands, adds sensible defaults, and makes it easy to work with a repository from any sub‑directory. It can be sourced as a library or executed directly as a CLI tool.
 
 ---  
 
-## Table of Contents  
-
-| Section | Description |
-|---------|-------------|
-| [Features](#features) | What the script can do |
-| [Prerequisites](#prerequisites) | Required tools & environment |
-| [Installation](#installation) | How to get the script on your system |
-| [Usage](#usage) | Quick‑start command reference |
-| [API Documentation](#api-documentation) | Functions, environment variables, and exit codes |
-| [Examples](#examples) | Real‑world workflows |
-| [Configuration](#configuration) | Customising behaviour |
-| [Contributing](#contributing) | How to help improve the project |
-| [License](#license) | Open‑source terms |
-
----  
-
-## Features  
-
-- **One‑liner shortcuts** for `git status`, `add`, `commit`, `push`, `pull`, `branch`, `checkout`, `merge`, `rebase`, `log`, and more.  
-- **Automatic branch detection** – the script knows the current branch and can act on it without extra flags.  
-- **Smart commit messages** – optional template that pre‑populates the message with ticket IDs, timestamps, or emojis.  
-- **Safety checks** – prevents accidental force‑pushes, pushes to protected branches, or committing with untracked files unless explicitly allowed.  
-- **Pluggable extensions** – you can source additional Bash functions to extend the command set.  
-
----  
-
-## Prerequisites  
-
-| Tool | Minimum version | Why |
-|------|----------------|-----|
-| `bash` | 4.0+ | Script is written in Bash. |
-| `git` | 2.20+ | Core VCS. |
-| `coreutils` (optional) | – | For `realpath`, `basename`, etc. |
-| `sed`, `awk`, `grep` | – | Used internally for parsing. |
-
-> **Tip:** The script works on Linux, macOS, and WSL (Windows Subsystem for Linux).  
+## Table of Contents
+1. [Installation](#installation)  
+2. [Usage](#usage)  
+3. [API Documentation](#api-documentation)  
+4. [Examples](#examples)  
+5. [Contributing & Support](#contributing--support)  
 
 ---  
 
 ## Installation  
 
-### 1️⃣ Clone the repository  
+### Prerequisites
+| Tool | Minimum version | Why |
+|------|----------------|-----|
+| `bash` | 4.0+ | Required for associative arrays and `[[ … ]]` tests |
+| `git` | 2.20+ | Core functionality |
+| `coreutils` (optional) | any | For `realpath`, `dirname`, etc. |
+
+> **Note:** The script is POSIX‑compatible except for a few Bash‑only features (associative arrays, `declare -g`). If you need strict POSIX compliance, see the `POSIX` branch.
+
+### Quick install (single user)
 
 ```bash
-git clone https://github.com/your‑username/github.sh.git
-cd github.sh
+# 1️⃣ Download the script
+curl -fsSL https://raw.githubusercontent.com/your-org/github.sh/main/github.sh \
+    -o ~/.local/bin/github.sh
+
+# 2️⃣ Make it executable
+chmod +x ~/.local/bin/github.sh
+
+# 3️⃣ Add to your PATH (if not already)
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
 ```
 
-### 2️⃣ Make the script executable  
+### System‑wide install (root)
 
 ```bash
-chmod +x github.sh
+sudo curl -fsSL https://raw.githubusercontent.com/your-org/github.sh/main/github.sh \
+    -o /usr/local/bin/github.sh
+sudo chmod +x /usr/local/bin/github.sh
 ```
 
-### 3️⃣ Add to your `$PATH` (recommended)  
+### As a library (source it)
 
-You can either move the script to a directory that is already on `$PATH` (e.g. `/usr/local/bin`) or add the repository’s `bin/` folder to your path.
+If you want to call the functions from your own scripts:
 
 ```bash
-# Option A – system‑wide (requires sudo)
-sudo mv github.sh /usr/local/bin/github
-
-# Option B – user‑local
-mkdir -p "$HOME/.local/bin"
-mv github.sh "$HOME/.local/bin/github"
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.bashrc"
-source "$HOME/.bashrc"
+source /path/to/github.sh   # e.g. /usr/local/bin/github.sh
 ```
 
-> **Note:** The command name is `github` (no extension) for convenience.
-
-### 4️⃣ Verify the installation  
+### Updating
 
 ```bash
-github --version
-# Expected output: github.sh v1.2.0
+# Using curl (single user)
+curl -fsSL https://raw.githubusercontent.com/your-org/github.sh/main/github.sh \
+    -o ~/.local/bin/github.sh && chmod +x ~/.local/bin/github.sh
+
+# Or, if you cloned the repo:
+git -C ~/github.sh pull && sudo cp github.sh /usr/local/bin/
 ```
 
 ---  
 
 ## Usage  
 
-`github` follows the pattern:
+`github.sh` can be invoked **directly** (CLI mode) or **sourced** (library mode).  
+
+### CLI Synopsis  
 
 ```bash
-github <subcommand> [options] [arguments]
+github.sh <command> [options] [-- <git‑args>]
 ```
 
-### Quick reference  
+| Command | Description |
+|---------|-------------|
+| `status` | Show `git status` for the repository root (even if you’re deep inside). |
+| `add`    | Shortcut for `git add`. Accepts the same arguments as `git add`. |
+| `commit` | Commit with a pre‑filled template. `-m "msg"` works as usual. |
+| `push`   | Push current branch to its upstream (or specify remote/branch). |
+| `pull`   | Pull with rebase (`git pull --rebase`) by default. |
+| `branch` | List, create, delete, or switch branches (`branch -c new`). |
+| `checkout` | Checkout a branch or commit (wraps `git checkout`). |
+| `log`    | Pretty‑printed log (`git log --oneline --graph`). |
+| `reset`  | Reset the working tree (`--hard`, `--soft`, etc.). |
+| `help`   | Show this help screen. |
 
-| Subcommand | Description | Example |
-|------------|-------------|---------|
-| `status`   | Show `git status` in a compact format. | `github status` |
-| `add`      | Stage files (defaults to `.`). | `github add src/` |
-| `commit`   | Commit staged changes. Supports `-m`, `-a`, `-e`. | `github commit -m "Fix bug #42"` |
-| `push`     | Push current branch to its upstream. | `github push` |
-| `pull`     | Pull & rebase (or merge) the upstream. | `github pull --rebase` |
-| `branch`   | List, create, delete, or rename branches. | `github branch -c feature/login` |
-| `checkout`| Switch branches or restore files. | `github checkout develop` |
-| `merge`    | Merge another branch into the current one. | `github merge feature/ui` |
-| `rebase`   | Rebase current branch onto another. | `github rebase main` |
-| `log`      | Pretty‑printed log (default 10 entries). | `github log -n 20` |
-| `reset`    | Reset HEAD or working tree (safe defaults). | `github reset --hard` |
-| `clean`    | Remove untracked files/directories. | `github clean -fd` |
-| `help`     | Show help for a subcommand. | `github help commit` |
-| `--version`| Print version information. | `github --version` |
+#### Global Options  
 
-### Global options  
+| Option | Alias | Description |
+|--------|-------|-------------|
+| `-h`   | `--help` | Show help and exit. |
+| `-v`   | `--version` | Print script version. |
+| `-q`   | `--quiet` | Suppress informational messages. |
+| `-d`   | `--debug` | Enable Bash `set -x` debugging output. |
+| `-r`   | `--repo <path>` | Force a repository root (overrides auto‑discovery). |
 
-| Flag | Meaning |
-|------|---------|
-| `-q, --quiet` | Suppress informational output (only errors). |
-| `-v, --verbose` | Show detailed debug information. |
-| `-h, --help` | Show the top‑level help. |
+#### Example CLI calls  
 
-### Subcommand‑specific options  
+```bash
+# Show status from any sub‑directory
+github.sh status
 
-Below is a condensed list; see the **API Documentation** section for the full spec.
+# Add all changes and commit with a message
+github.sh add . && github.sh commit -m "Refactor utils"
 
-| Subcommand | Option | Description |
-|------------|--------|-------------|
-| `commit` | `-m <msg>` | Use `<msg>` as the commit message (no editor). |
-| | `-a` | Stage *all* modified files before committing. |
-| | `-e` | Open the default `$EDITOR` for the commit message. |
-| `push` | `-f, --force` | Force‑push (disabled by default on protected branches). |
-| | `--set-upstream` | Set upstream to the remote branch if missing. |
-| `pull` | `--rebase` | Pull with `--rebase` instead of merge. |
-| `branch` | `-c <name>` | Create a new branch `<name>` and switch to it. |
-| | `-d <name>` | Delete branch `<name>` (local only). |
-| | `-r <old:new>` | Rename branch `<old>` to `<new>`. |
-| `log` | `-n <num>` | Show the last `<num>` commits (default 10). |
-| | `--oneline` | One‑line per commit (default). |
-| | `--graph` | Include a graph view. |
-| `reset` | `--soft` | Keep working tree, reset only HEAD. |
-| | `--mixed` | Reset index but keep working tree (default). |
-| | `--hard` | Reset index **and** working tree. |
-| `clean` | `-f` | Force removal (required by Git). |
-| | `-d` | Remove untracked directories as well. |
+# Push current branch to origin
+github.sh push
+
+# Create a new branch and switch to it
+github.sh branch -c feature/login
+
+# Show a compact log
+github.sh log -- --decorate
+```
+
+> **Tip:** Anything after `--` is passed verbatim to the underlying `git` command, allowing you to use any git flag not explicitly wrapped.
 
 ---  
 
 ## API Documentation  
 
-`github.sh` is a single‑file Bash library that can also be **sourced** from other scripts. All public functions are prefixed with `gh_` to avoid name clashes.
+When sourced, the script exposes a small, well‑documented function library. All functions are prefixed with `gh_` to avoid name clashes.
 
-| Function | Synopsis | Description | Exit codes |
-|----------|----------|-------------|------------|
-| `gh_version` | `gh_version` | Prints the script version (`vX.Y.Z`). | `0` |
-| `gh_status` | `gh_status [-q]` | Wrapper around `git status --short`. `-q` suppresses the “On branch …” line. | `0` on success, `1` on Git error |
-| `gh_add` | `gh_add [<path>…]` | Stages the given paths (or `.` if omitted). | `0` / `1` |
-| `gh_commit` | `gh_commit [-a] [-m <msg>] [-e]` | Commits staged changes. `-a` stages all modified files first. `-e` opens `$EDITOR`. | `0` / `1` |
-| `gh_push` | `gh_push [--force] [<remote> <branch>]` | Pushes the current branch. If `<remote>`/`<branch>` omitted, uses upstream. | `0` / `1` |
-| `gh_pull` | `gh_pull [--rebase] [<remote> <branch>]` | Pulls from upstream (or supplied remote/branch). | `0`
+| Function | Signature | Description |
+|----------|-----------|-------------|
+| `gh_find_repo_root` | `gh_find_repo_root [start_dir]` → `string` | Walks up the directory tree from `start_dir` (default `$PWD`) until a `.git` folder is found. Returns the absolute path or exits with error. |
+| `gh_git` | `gh_git <git‑subcommand> [args…]` | Thin wrapper that runs `git` from the repository root, preserving the current working directory. Handles error propagation. |
+| `gh_status` | `gh_status` | Calls `gh_git status -sb`. |
+| `gh_add` | `gh_add <pathspec…>` | Wrapper for `git add`. |
+| `gh_commit` | `gh_commit [-m msg] [--amend]` | Commits with optional message. If no `-m` is supplied, opens `$EDITOR` with a template. |
+| `gh_push` | `gh_push [remote] [branch]` | Pushes the current branch to the given remote (default `origin`). |
+| `gh_pull` | `gh_pull [remote] [branch]` | Pulls with `--rebase` by default. |
+| `gh_branch` | `gh_branch [-l] [-c name] [-d name] [name]` | List (`-l`), create (`-c`), delete (`-d`), or checkout (`name`) a branch. |
+| `gh_checkout` | `gh_checkout <ref>` | Wrapper for `git checkout`. |
+| `gh_log` | `gh_log [git‑log‑options…]` | Pretty‑printed log (`--oneline --graph --decorate`). |
+| `gh_reset` | `gh_reset [--hard|--soft|--mixed] [commit]` | Reset the working tree. |
+| `gh_help` | `gh_help` | Prints the same help as the CLI. |
+| `gh_version` | `gh_version` | Echoes the script version. |
+
+### Internal Constants  
+
+| Name | Value | Purpose |
+|------|-------|---------|
+| `GH_VERSION` | `1.4.2` | Current script version. |
+| `GH_DEFAULT_REMOTE` | `origin` | Default remote used by `push`/`pull`. |
+| `GH_LOG_FORMAT` | `"%C(auto)%h %C(bold blue)%d %C(reset)%s %C(green)(%cr)%C(reset)"` | Default `git log` pretty format. |
+
+### Error handling  
+
+All public functions exit with a non‑zero status on failure and print a concise error message to `stderr`. When used in a script, you can capture the error code:
+
+```bash
+if ! gh_push; then
+    echo "❌ Push failed – aborting" >&2
+    exit 1
+fi
+```
+
+### Extending the library  
+
+You can add your own helpers by sourcing the script **after** your definitions, or by defining functions that call the internal `gh_git` wrapper:
+
+```bash
+my_rebase_onto_master() {
+    local branch
+    branch=$(git rev-parse --abbrev-ref HEAD)
+    gh_git checkout master && gh_git pull && gh_git checkout "$branch" && gh_git rebase master
+}
+```
+
+---  
+
+## Examples  
+
+### 1️⃣ Quick status from any sub‑folder  
+
+```bash
+$ cd ~/projects/my-app/src/components
+$ github.sh status
+## On branch feature/ui
+## Your branch is ahead of 'origin/feature/ui' by 2 commits.
+##   (use "git push" to publish your local commits)
+##
+## Changes not staged for commit:
+##   modified:   src/components/Button.vue
+##
+## Untracked files:
+##   src/components/NewWidget.vue
+```
+
+### 2️⃣ Automated commit workflow  
+
+```bash
+# Add everything, open an editor with a commit template, then push
+github.sh add .
+github.sh commit          # opens $EDITOR with a template
+github.sh
